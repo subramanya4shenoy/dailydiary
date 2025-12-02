@@ -1,0 +1,54 @@
+# --- Python / Backend ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+.env/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Logs
+*.log
+
+# macOS
+.DS_Store
+
+# IDE / Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Coverage / testing
+.pytest_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# --- Docker / local runtime data ---
+*.pid
+*.out
+
+# --- Node / Frontend (for future web app) ---
+node_modules/
+web/node_modules/
+web/.next/
+web/dist/
+web/build/
+web/.cache/
+
+# Env files (keep tracked ones already added to git)
+*.env.local
+*.env.development
+*.env.production
+infra/env/*.local
+
+
