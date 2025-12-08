@@ -52,3 +52,4 @@ web/.cache/
 infra/env/*.local
 
 
+infra/env/dev.env

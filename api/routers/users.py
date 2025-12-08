@@ -1,19 +1,47 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
+from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
+from auth.auth import create_access_token
 from db.database import get_db
-from schemas.users import UserOut, UserSignup
-from services.users import signup_user
+from schemas.users import UserLogin, UserPreference, UserSignup
+from services.users import is_existing_user, login_user, signup_user
 from sqlalchemy.orm import Session
-
 
 router = APIRouter()
 
-
-@router.post("/signup", response_model=UserOut, status_code=status.HTTP_201_CREATED)
+@router.post("/signup", response_model=UserPreference, status_code=status.HTTP_201_CREATED)
 def signup(user: UserSignup, db: Session = Depends(get_db)):
+    # check if user exists
+    if is_existing_user(user.user_email, db):
+        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, 
+                            detail={
+                                'code': 400, 
+                                "msg":"user already  exists"
+                                }
+                            )
+    # create new user
     new_user = signup_user(user, db)
-    return {'email': new_user.email, 'password': new_user.password_hash}
+    # if creationfails
+    if new_user is None:
+        raise HTTPException(status_code=HTTP_403_FORBIDDEN, 
+                            detail={
+                                "code": "403", 
+                                "msg": "Signup Failed badlY!"
+                                }
+                            )
+    # on scuccessful creation of user
+    if new_user:
+        return {
+            'email': new_user['email'], 
+            'token': create_access_token({"sub": new_user["id"]})
+            }
 
 
-@router.post("/login")
-def login():
-    return { 'login_status': 'ok'}
+@router.post("/login", response_model=UserPreference, status_code=status.HTTP_200_OK)
+def login(user: UserLogin, db: Session = Depends(get_db)) -> UserPreference:
+    # logged_in_user = login_user(user, db);
+    # if not logged_in_user:
+    #     raise HTTPException(
+    #         status_code=HTTP_404_NOT_FOUND, details="User not found"
+    #     )
+    # return logged_in_user
+    pass
