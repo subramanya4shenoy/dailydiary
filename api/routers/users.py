@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, Form, HTTPException, status
 from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
 from auth.auth import create_access_token
 from db.database import get_db
 from schemas.users import UserLogin, UserPreference, UserSignup
 from services.users import is_existing_user, login_user, signup_user
 from sqlalchemy.orm import Session
+from fastapi.security import OAuth2PasswordRequestForm
+
 
 router = APIRouter()
 
@@ -37,11 +39,20 @@ def signup(user: UserSignup, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=UserPreference, status_code=status.HTTP_200_OK)
-def login(user: UserLogin, db: Session = Depends(get_db)) -> UserPreference:
-    # logged_in_user = login_user(user, db);
-    # if not logged_in_user:
-    #     raise HTTPException(
-    #         status_code=HTTP_404_NOT_FOUND, details="User not found"
-    #     )
-    # return logged_in_user
-    pass
+def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db)
+    ):
+
+    if not is_existing_user(form_data.username, db):
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="user not found")
+    
+    valid_user = login_user(form_data.username, form_data.password, db)
+    
+    if not valid_user:
+        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
+    
+    return {
+        'email': valid_user.email, 
+        'token': create_access_token({"sub": valid_user.id})
+        }
