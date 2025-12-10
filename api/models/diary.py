@@ -14,5 +14,5 @@ class Diary(Base):
     mood: Mapped[str] = mapped_column(String[255], nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
-    diary_date: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime)
     tags: Mapped[str] = mapped_column(Text, nullable=True)
+    diary_id: Mapped[str] = mapped_column(Text, nullable=False)
