@@ -39,10 +39,7 @@ def signup(user: UserSignup, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=UserPreference, status_code=status.HTTP_200_OK)
-def login(
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    db: Session = Depends(get_db)
-    ):
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
 
     if not is_existing_user(form_data.username, db):
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="user not found")
@@ -52,7 +49,4 @@ def login(
     if not valid_user:
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
     
-    return {
-        'email': valid_user.email, 
-        'token': create_access_token({"sub": valid_user.id})
-        }
+    return { 'email': valid_user.email,  'token': create_access_token({"sub": str(valid_user.id)})}
