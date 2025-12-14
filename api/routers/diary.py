@@ -1,15 +1,15 @@
 from db.database import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
-from starlette.status import HTTP_200_OK
+from starlette.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 from sqlalchemy.orm import Session
 
 from auth.auth import get_current_user
 from schemas.diary import Page
-from services.diary import create_diary
+from services.diary import create_diary, read_diary_page
 router = APIRouter()
 
 @router.get("/diary/{diary_page}")
-def read_diary_page(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def get_diary_page(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     """
     Read a diary page from the database
     Args:
@@ -17,11 +17,13 @@ def read_diary_page(db: Session = Depends(get_db), current_user = Depends(get_cu
     Returns:
         diary_page: Diary
     """
-    diary_page = read_diary_page(diary_page, db, current_user)
-    return { "status": "ok", "requested": diary_page}
+    page = read_diary_page(diary_page, db, current_user)
+    if page is None:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Page not found")
+    return { "status": "ok", "requested": page}
 
 @router.post("/diary")
-def add_diary_page(page: Page, 
+def post_diary_page(page: Page, 
                 db: Session = Depends(get_db),
                 current_user = Depends(get_current_user)):
     """

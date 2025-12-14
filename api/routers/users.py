@@ -15,27 +15,16 @@ def signup(user: UserSignup, db: Session = Depends(get_db)):
     # check if user exists
     if is_existing_user(user.user_email, db):
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, 
-                            detail={
-                                'code': 400, 
-                                "msg":"user already  exists"
-                                }
-                            )
+                            detail={'code': 400, "msg":"user already  exists"})
     # create new user
     new_user = signup_user(user, db)
     # if creationfails
     if new_user is None:
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, 
-                            detail={
-                                "code": "403", 
-                                "msg": "Signup Failed badlY!"
-                                }
-                            )
+                            detail={ "code": "403", "msg": "Signup Failed badlY!" })
     # on scuccessful creation of user
     if new_user:
-        return {
-            'email': new_user['email'], 
-            'token': create_access_token({"sub": new_user["id"]})
-            }
+        return { 'email': new_user['email'], 'token': create_access_token({"sub": new_user["id"]})}
 
 
 @router.post("/login", response_model=UserPreference, status_code=status.HTTP_200_OK)
