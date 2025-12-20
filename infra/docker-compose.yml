@@ -22,6 +22,39 @@ services:
         volumes:
             - dd_db_data:/var/lib/postgresql/data
             - ./db/init:/docker-entrypoint-initdb.d
-    
+    loki:
+        container_name: dd_loki
+        image: grafana/loki:2.9.8
+        ports:
+            - "3100:3100"
+        volumes:
+            - ./loki-config.yml:/etc/loki/config.yml:ro
+            - ./loki-data:/loki
+        restart: unless-stopped
+    promtail:
+        container_name: dd_promtail
+        image: grafana/promtail:2.9.8
+        volumes:
+            - ./promtail-config.yml:/etc/promtail/config.yml:ro
+            - /var/lib/docker/containers:/var/lib/docker/containers:ro
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+        restart: unless-stopped
+        depends_on:
+            - loki
+    grafana:
+        container_name: dd_grafana
+        image: grafana/grafana:10.2.4
+        ports:
+            - "3000:3000"
+        env_file:
+            - ./env/dev.env
+        volumes:
+            - ./grafana-data:/var/lib/grafana
+        restart: unless-stopped
+        depends_on:
+            - loki
+            - promtail
 volumes:
     dd_db_data:
+    loki-data:
+    grafana-data:

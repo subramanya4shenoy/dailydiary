@@ -53,3 +53,5 @@ infra/env/*.local
 
 
 infra/env/dev.env
+loki-data/
+grafana-data/
